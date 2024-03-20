@@ -1,0 +1,11 @@
+﻿<div class="extension-content @(HideContent ? "fadeOutEl" : "fadeInEl")">
+    <div class="extension-content-shared">
+        <UIButton ImageStyle="width: 24px; height: 24px;" Click="Clicked" Image="favicon.png"></UIButton>
+    </div>
+    <div class="extension-content-local @(HideContent ? "fadeOut" : "fadeIn")">
+        @if (ContentType != null)
+        {
+            <DynamicComponent Type="ContentType" Parameters="ContentParameters" />
+        }
+    </div>
+</div>

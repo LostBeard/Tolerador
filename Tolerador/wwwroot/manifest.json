@@ -1,0 +1,57 @@
+{
+  "name": "Tolerador",
+  "description": "Media stream configurator.",
+  "version": "1.0.3",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "app/popup.html",
+    "default_icon": "app/icon-192.png"
+  },
+  "background": {
+    // "service_worker": "app/background.js"     // Chrome
+    // "page": "app/background.html"              // Firefox
+  },
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab",
+    "tabs",
+    "webRequest",
+    "webNavigation",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "app/_content/SpawnDev.BlazorJS.BrowserExtension/browser-polyfill.min.js",
+        "app/_content/SpawnDev.BlazorJS.BrowserExtension/content-bridge.js",
+        "app/_content/SpawnDev.BlazorJS.BrowserExtension/content.js"
+      ],
+      "run_at": "document_end",
+      "matches": [ "<all_urls>" ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "app/*"
+      ],
+      "matches": [ "<all_urls>" ]
+    }
+  ],
+  "options_ui": {
+    "page": "app/options.html",
+    "open_in_tab": true
+  },
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*",
+    "<all_urls>"
+  ]
+}
+

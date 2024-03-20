@@ -1,0 +1,12 @@
+﻿@page "/"
+
+@code {
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+
+    protected override void OnInitialized()
+    {
+        // redirect to index.html
+        NavigationManager.NavigateTo("index.html");
+    }
+}

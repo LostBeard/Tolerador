@@ -1,0 +1,10 @@
+﻿@attribute [ContentLocation(@"https://www\.paramountplus\.com")]
+
+<div>
+    <UIToggle Value="@MuteToggleValue" ValueChanged=@MuteAds_OnClicked Text="Mute Ads" Title="Mute Ads" Icons="@(new string[]{"radio_button_unchecked","radio_button_checked"})" />
+    <UIToggle Value="@SkipAdsToggleValue" ValueChanged=@SkipAds_OnClicked Text="Skip Ads" Title="Skip Ads" Icons="@(new string[]{"radio_button_unchecked","radio_button_checked"})" />
+</div>
+
+@code {
+
+}
