@@ -21,16 +21,54 @@ namespace Tolerador.ExtensionContent
         int MuteToggleValue => VideoWebSiteExtension!.MuteAds ? 1 : 0;
         int SkipAdsToggleValue => VideoWebSiteExtension!.SkipAds ? 1 : 0;
         Document Document { get; set; }
+        Window Window { get; set; }
+
+        Screen Screen { get; set; }
         Dictionary<string, ParamountPlusVideo> Videos { get; } = new Dictionary<string, ParamountPlusVideo>();
+        //bool IsFullHeightWindow = false;
+        //bool IsFullWidthWindow = false;
+        //Element? FullscreenElement = null;
+        bool OverflowHidden = false;
+        void Window_OnResize()
+        {
+            UpdateOverflowCheck();
+        }
+        void UpdateOverflowCheck(bool? playingValue = null)
+        {
+            JS.Log("UpdateOverflowCheck");
+            using var fullscreenElement = Document.FullscreenElement;
+            // the difference can be a a pixel so give a little leeway
+            bool isFullHeightWindow = Math.Abs(Window.InnerHeight - Screen.Height) < 5;
+            var playing = playingValue != null ? playingValue.Value : Videos.Values.FirstOrDefault(o => o.VideoElement.IsPlaying()) != null;
+            var overflowHidden = isFullHeightWindow && fullscreenElement == null && playing;
+            JS.Log("- Playing", playing);
+            JS.Log("- IsFullHeightWindow", isFullHeightWindow);
+            JS.Log("- FullscreenElement == null", fullscreenElement == null);
+            JS.Log("== overflowHidden", overflowHidden);
+            if (OverflowHidden != overflowHidden)
+            {
+                OverflowHidden = overflowHidden;
+                using var htmlElement = Document.DocumentElement!.JSRefMove<HTMLElement>();
+                using var style = htmlElement.Style;
+                if (OverflowHidden)
+                {
+                    ScrollToTop();
+                    style.SetProperty("overflow", "hidden");
+                }
+                else
+                {
+                    style.RemoveProperty("overflow");
+                }
+            }
+        }
         protected override async Task OnInitializedAsync()
         {
             Console.WriteLine($"{GetType().Name}.OnInitialized");
             SyncStorage = BrowserExtensionService.Chrome!.Storage!.Sync;
             Document = JS.Get<Document>("document");
-
-
-            
-
+            Window = JS.Get<Window>("window");
+            Window.OnResize += Window_OnResize;
+            Screen = Window.Screen;
             VideoWebSiteExtension = new VideoWebSiteExtension(JS, BrowserExtensionService);
             // watch for document changes
             VideoWebSiteExtension.OnBodyObserverObserved += VideoWebSiteExtension_OnBodyObserverObserved;
@@ -111,15 +149,35 @@ namespace Tolerador.ExtensionContent
                 }
             }
         }
+        void ScrollToTop()
+        {
+            // below method can laod incorrect page url
+            //using var location = Window.Location;
+            //location.Href = "#";
+        }
+        void Video_OnPlay()
+        {
+            UpdateOverflowCheck(true);
+        }
+        void Video_OnPause()
+        {
+            UpdateOverflowCheck(false);
+        }
         void VideoElementFound(ParamountPlusVideo videoElement)
         {
             var ext = videoElement.Player != null ? "++" : "";
             JS.Log($"ParamountPlusVideo{ext} element found", videoElement.VideoId, Videos.Count);
+            videoElement.VideoElement.OnPlay += Video_OnPlay;
+            videoElement.VideoElement.OnPause += Video_OnPause;
+            UpdateOverflowCheck();
         }
         void VideoElementLost(ParamountPlusVideo videoElement)
         {
             var ext = videoElement.Player != null ? "++" : "";
             JS.Log($"ParamountPlusVideo{ext} element lost", videoElement.VideoId, Videos.Count);
+            videoElement.VideoElement.OnPlay -= Video_OnPlay;
+            videoElement.VideoElement.OnPause -= Video_OnPause;
+            UpdateOverflowCheck();
         }
         async Task MuteAds_OnClicked(int index)
         {
@@ -144,25 +202,34 @@ namespace Tolerador.ExtensionContent
         }
         private void VideoWebSiteExtension_OnWatchedNodesUpdated(List<string> changedWatchNodes)
         {
-            if (changedWatchNodes.Count == 0) return;
-            var videoFound = VideoWebSiteExtension!.Found("video");
-            var playing = VideoWebSiteExtension.Playing;
-            var skipAd = VideoWebSiteExtension.Found("skipAd");
-            var ad = VideoWebSiteExtension.Found("ad-indicator") || skipAd;
-            var muted = VideoWebSiteExtension.Muted;
-            JS.Log(new
-            {
-                videoFound = videoFound,
-                playing = playing,
-                ad = ad,
-                skipAd = skipAd,
-                muted = muted,
-            });
+            //if (changedWatchNodes.Count == 0) return;
+            var videoFound = Videos.Count > 0;
             if (!videoFound)
             {
                 return;
             }
-            var requirePlaying = false;
+            //var playing1 = VideoWebSiteExtension.Playing;
+
+            //var playing = Videos.Values.FirstOrDefault(o => o.VideoElement.IsPlaying()) != null;
+            var playing = Videos.Values.FirstOrDefault(o => o.VideoElement.IsPlaying()) != null;
+
+            var skipAd = VideoWebSiteExtension.Found("skipAd");
+            var ad = VideoWebSiteExtension.Found("ad-indicator") || skipAd;
+            var muted = VideoWebSiteExtension.Muted;
+            //JS.Log(new
+            //{
+            //    videoFound = videoFound,
+            //    playing = playing,
+            //    ad = ad,
+            //    skipAd = skipAd,
+            //    muted = muted,
+            //});
+            //if (playing != Playing)
+            //{
+            //    Playing = playing;
+            //    UpdateOverflowCheck();
+            //}
+            var requirePlaying = true;
             if (requirePlaying && !playing)
             {
                 return;

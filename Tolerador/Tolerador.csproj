@@ -4,7 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>2.2.64</Version>
+		<Version>2.2.77-alpha1</Version>
 		<CompressionEnabled>false</CompressionEnabled>
 
 		<SpawnDevBrowserExtensionPlatforms>Chrome;Firefox</SpawnDevBrowserExtensionPlatforms>
@@ -23,8 +23,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SpawnDev.BlazorJS.WebWorkers" Version="2.2.65-alpha10" />
-		<PackageReference Include="SpawnDev.BlazorJS.BrowserExtension" Version="2.2.65-alpha5" />
+		<PackageReference Include="SpawnDev.BlazorJS.WebWorkers" Version="2.2.82" />
+		<PackageReference Include="SpawnDev.BlazorJS.BrowserExtension" Version="2.2.82-alpha2" />
 	</ItemGroup>
 
 </Project>
