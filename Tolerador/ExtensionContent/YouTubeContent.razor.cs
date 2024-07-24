@@ -38,7 +38,10 @@ namespace Tolerador.ExtensionContent
             VideoWebSiteExtension.OnWatchedNodesUpdated += VideoWebSiteExtension_OnWatchedNodesUpdated;
             VideoWebSiteExtension.WatchNodes = new List<WatchNode>
                 {
-                    new WatchNode("skipAd", "button.ytp-ad-skip-button-modern", checkVisibility: true),
+                    // ytp-skip-ad-button
+                    new WatchNode("skipAd", "button.ytp-skip-ad-button", checkVisibility: true),
+                    new WatchNode("skipAd2", "button.ytp-ad-skip-button-modern", checkVisibility: true),
+                    // 
                     new WatchNode("video", "video", checkVisibility: true),
                     new WatchNode("play", "button.ytp-play-button", checkVisibility: true),
                     new WatchNode("pause", "button.ytp-pause-button", checkVisibility: true),
@@ -86,15 +89,17 @@ namespace Tolerador.ExtensionContent
                 return;
             }
             var skipAd = VideoWebSiteExtension.Found("skipAd");
-            var ad = VideoWebSiteExtension.Found("ad-indicator") || skipAd;
+            var skipAd2 = VideoWebSiteExtension.Found("skipAd2");
+            var ad = VideoWebSiteExtension.Found("ad-indicator") || skipAd || skipAd2;
             var muted = VideoWebSiteExtension.Muted;
             var playing = VideoWebSiteExtension.Playing;
-            if (playing && ad && skipAd)
+            if (playing && ad)
             {
                 if (VideoWebSiteExtension.SkipAds)
                 {
                     Console.WriteLine("- Skipping ad");
-                    VideoWebSiteExtension.SkipAd();
+                    if (skipAd) VideoWebSiteExtension.ClickWatchedNodeButton("skipAd");
+                    else if (skipAd2) VideoWebSiteExtension.ClickWatchedNodeButton("skipAd2");
                 }
             }
             if (ad && !muted)

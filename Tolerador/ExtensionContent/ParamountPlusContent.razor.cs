@@ -5,7 +5,6 @@ using SpawnDev.BlazorJS.BrowserExtension.Services;
 using SpawnDev.BlazorJS.JSObjects;
 using Tolerador.WebSiteExtensions;
 
-
 namespace Tolerador.ExtensionContent
 {
     public partial class ParamountPlusContent : IDisposable
@@ -151,7 +150,7 @@ namespace Tolerador.ExtensionContent
         }
         void ScrollToTop()
         {
-            // below method can laod incorrect page url
+            // below method can load incorrect page url
             //using var location = Window.Location;
             //location.Href = "#";
         }

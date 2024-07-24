@@ -5,14 +5,11 @@ browser.runtime.onInstalled.addListener(async (e) => {
     console.log('onInstalled', e);
     // if an app component is found that points to installed.html it will be opened on the onInstalled event
     // load installed page 
-    const indexPageUrl = browser.runtime.getURL("app/installed.html");
-    browser.tabs.create({
-        url: indexPageUrl
-    });
+    //const indexPageUrl = browser.runtime.getURL("app/installed.html");
+    //browser.tabs.create({
+    //    url: indexPageUrl
+    //});
 });
-
-
-
 
 browser.runtime.onStartup.addListener((e) => {
     console.log(`onStartup`, e);
@@ -82,7 +79,7 @@ async function patchCSP(request, sender) {
             return;
         }
         var url = new URL(request.cspViolation.documentURI);
-        // separate paths on the same domain MAY have different csp rules
+        // separate paths on the same domain MAY (uncommon) have different csp rules
         // the query string and hash shouldn't have any effect on csp rules
         // check if the extension actualyl wants to patch this csp or not
         // could check user settings.

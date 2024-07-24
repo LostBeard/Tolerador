@@ -20,11 +20,11 @@ namespace Tolerador.ServiceWorkers
         private void Tmr_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             // simple alive indicator for debugging
-            Log($"Tick: {InstanceId}");
+            Log($"Tick: {JS.InstanceId}");
         }
         void Log(params object[] args)
         {
-            JS.Log(new object?[] { $"ServiceWorkerEventHandler > {InstanceId}" }.Concat(args).ToArray());
+            JS.Log(new object?[] { $"ServiceWorkerEventHandler > {JS.InstanceId}" }.Concat(args).ToArray());
         }
     }
 }

@@ -49,6 +49,11 @@ namespace Tolerador.WebSiteExtensions
             using var el = GetWatchNodeEl<HTMLButtonElement>("skipAd");
             el?.Click();
         }
+        public void ClickWatchedNodeButton(string name)
+        {
+            using var el = GetWatchNodeEl<HTMLButtonElement>(name);
+            el?.Click();
+        }
         public void Pause()
         {
             using var el = GetWatchNodeEl<HTMLButtonElement>("pause");
