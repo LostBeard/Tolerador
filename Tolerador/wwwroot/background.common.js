@@ -1,8 +1,7 @@
-
 // could be running in a Firefox extension background page or a Chrome extension ServiceWorker
-
+// Runtime
 browser.runtime.onInstalled.addListener(async (e) => {
-    console.log('onInstalled', e);
+    console.log('runtime.onInstalled', e);
     // if an app component is found that points to installed.html it will be opened on the onInstalled event
     // load installed page 
     //const indexPageUrl = browser.runtime.getURL("app/installed.html");
@@ -10,24 +9,28 @@ browser.runtime.onInstalled.addListener(async (e) => {
     //    url: indexPageUrl
     //});
 });
-
 browser.runtime.onStartup.addListener((e) => {
-    console.log(`onStartup`, e);
+    //console.log(`runtime.onStartup`, e);
 });
 browser.runtime.onSuspend.addListener((e) => {
-    console.log(`onSuspend`, e);
+    //console.log(`runtime.onSuspend`, e);
 });
+browser.windows.onCreated.addListener(function (window) {
+    //console.log('windows.onCreated', window);
+});
+browser.windows.onRemoved.addListener(function (window) {
+    //console.log('windows.onRemoved', window);
+});
+// Tabs
 browser.tabs.onCreated.addListener(function (e) {
-    console.log('tabs.onCreated', e);
+    //console.log('tabs.onCreated', e);
 });
 browser.tabs.onRemoved.addListener(function (e) {
-    console.log('tabs.onRemoved', e);
+    //console.log('tabs.onRemoved', e);
 });
 browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    console.log('tabs.onUpdated', tabId, changeInfo, tab);
+    //console.log('tabs.onUpdated', tabId, changeInfo, tab);
     // changeInfo object: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/onUpdated#changeInfo
-    // status is more reliable (in my case)
-    // use "alert(JSON.stringify(changeInfo))" to check what's available and works in your case
     if (changeInfo.status === 'complete') {
         // below throws an error if not listening in a content script
         //chrome.tabs.sendMessage(tabId, {
@@ -35,36 +38,30 @@ browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         //});
     }
 });
+// WebNavigation
 chrome.webNavigation.onBeforeNavigate.addListener((e) => {
-    console.log('onBeforeNavigate', e);
+    //console.log('onBeforeNavigate', e);
 });
 chrome.webNavigation.onCommitted.addListener((e) => {
-    console.log('onCommitted', e);
+    //console.log('onCommitted', e);
 });
 chrome.webNavigation.onDOMContentLoaded.addListener((e) => {
-    console.log('onDOMContentLoaded', e);
+    //console.log('onDOMContentLoaded', e);
 });
 chrome.webNavigation.onCompleted.addListener((e) => {
-    console.log('onCompleted', e);
+    //console.log('onCompleted', e);
 });
 chrome.webNavigation.onReferenceFragmentUpdated.addListener((details) => {
-    console.log('onReferenceFragmentUpdated', details);
+    //console.log('onReferenceFragmentUpdated', details);
 });
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-    console.log('onHistoryStateUpdated', details);
+    //console.log('onHistoryStateUpdated', details);
 });
 //chrome.webRequest.onHeadersReceived.addListener((details) => {
 //    console.log('onHeadersReceived', details);
 //    console.log('headers', details.responseHeaders);
 //});
-browser.windows.onCreated.addListener(function (window) {
-    console.log('windows.onCreated', window);
-});
-browser.windows.onRemoved.addListener(function (window) {
-    console.log('windows.onRemoved', window);
-});
 async function shouldPatchCSPCheck(url) {
-
     return true;
 }
 async function patchCSP(request, sender) {
@@ -117,6 +114,7 @@ async function patchCSP(request, sender) {
         browser.tabs.reload(sender.tab.id);
     }
 }
+// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.cspViolation) {
         patchCSP(request, sender);

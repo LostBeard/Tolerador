@@ -4,7 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>2.3.0-alpha.1</Version>
+		<Version>2.3.0-alpha.5</Version>
 		<CompressionEnabled>false</CompressionEnabled>
 
 		<!-- Tells SpawnDev.BlazorJS.BrowserExtension to build for the specified platforms -->
@@ -25,8 +25,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SpawnDev.BlazorJS.WebWorkers" Version="2.4.7" />
-		<PackageReference Include="SpawnDev.BlazorJS.BrowserExtension" Version="2.3.0-alpha.1" />
+		<PackageReference Include="SpawnDev.BlazorJS.WebWorkers" Version="2.5.4" />
+		<PackageReference Include="SpawnDev.BlazorJS.BrowserExtension" Version="2.3.0-alpha.24" />
 	</ItemGroup>
 
 </Project>

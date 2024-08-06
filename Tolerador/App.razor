@@ -1,4 +1,6 @@
-﻿@if (BrowserExtensionService.ExtensionMode == ExtensionMode.Content)
+﻿@inject BrowserExtensionService BrowserExtensionService
+
+@if (BrowserExtensionService.ExtensionMode == ExtensionMode.Content)
 {
     <ContentOverlay AppAssembly="@typeof(App).Assembly"></ContentOverlay>
 }
@@ -16,9 +18,4 @@ else
             </LayoutView>
         </NotFound>
     </Router>
-}
-
-@code {
-    [Inject]
-    BrowserExtensionService BrowserExtensionService { get; set; }
 }
