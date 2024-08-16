@@ -7,7 +7,15 @@
     "default_popup": "app/popup.html",
     "default_icon": "app/icon-192.png"
   },
+  "options_ui": {
+    "page": "app/options.html",
+    "open_in_tab": true
+  },
   "background": {
+    /* Chrome and Firefox have incompatible ways of supporting background scripts
+    *  manifest.{PlatformName}.json files will be merged with manifest.json on build to allow
+    *  per-platform and shared manifest entries in platform builds
+    */
     // "service_worker": "app/background.js"     // Chrome
     // "page": "app/background.html"              // Firefox
   },
@@ -44,14 +52,9 @@
       "matches": [ "<all_urls>" ]
     }
   ],
-  "options_ui": {
-    "page": "app/options.html",
-    "open_in_tab": true
-  },
   "host_permissions": [
     "https://*/*",
     "http://*/*",
     "<all_urls>"
   ]
 }
-

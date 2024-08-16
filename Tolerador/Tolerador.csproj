@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>2.3.0-alpha.5</Version>
+		<Version>2.5.8-alpha.3</Version>
 		<CompressionEnabled>false</CompressionEnabled>
 
 		<!-- Tells SpawnDev.BlazorJS.BrowserExtension to build for the specified platforms -->
@@ -12,21 +12,24 @@
 		
 		<!-- Tells SpawnDev.BlazorJS.WebWorkers to build-time patch the Blazor WASM framework instead of runtime patching it (required for browser extension due to script restrictions) -->
 		<WebWorkerPatchFramework>true</WebWorkerPatchFramework>
-		
-		<!-- 
-		<_DebugSpawnDevBrowserExtensionBuildTasks>true</_DebugSpawnDevBrowserExtensionBuildTasks>
-		<_SpawnDevBrowserExtensionBuildTasksAssembly>D:\users\tj\Projects\SpawnDev.BlazorJS.BrowserExtension\SpawnDev.BlazorJS.BrowserExtension\SpawnDev.BlazorJS.BrowserExtension\tasks\netstandard2.0\SpawnDev.BlazorJS.BrowserExtension.Build.dll</_SpawnDevBrowserExtensionBuildTasksAssembly>
-		-->
+
+		<_DebugSpawnDevBrowserExtensionBuildTasks>false</_DebugSpawnDevBrowserExtensionBuildTasks>
+
+		<SpawnDevBrowserExtensionVerbose>true</SpawnDevBrowserExtensionVerbose>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.7" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0-preview.7.24406.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0-preview.7.24406.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SpawnDev.BlazorJS.WebWorkers" Version="2.5.4" />
-		<PackageReference Include="SpawnDev.BlazorJS.BrowserExtension" Version="2.3.0-alpha.24" />
+		<PackageReference Include="SpawnDev.BlazorJS.WebWorkers" Version="2.5.8" />
+		<PackageReference Include="SpawnDev.BlazorJS.BrowserExtension" Version="2.5.8-alpha.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\SpawnDev.OmniClops\SpawnDev.OmniClops\SpawnDev.BlazorJS.SpeerNet\SpawnDev.BlazorJS.SpeerNet.csproj" />
 	</ItemGroup>
 
 </Project>

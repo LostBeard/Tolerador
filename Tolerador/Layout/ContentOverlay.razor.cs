@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using SpawnDev.BlazorJS.BrowserExtension;
-using SpawnDev.BlazorJS.BrowserExtension.JSObjects;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
 using SpawnDev.BlazorJS.JSObjects;
 using System.Reflection;
@@ -40,7 +39,7 @@ namespace Tolerador.Layout
         {
             if (!BeenInit)
             {
-                SyncStorage = BrowserExtensionService.Chrome!.Storage!.Sync;
+                SyncStorage = BrowserExtensionService.Browser!.Storage!.Sync;
                 BeenInit = true;
                 CacheRoutes();
                 ContentOverlayUpdate();

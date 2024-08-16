@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SpawnDev.BlazorJS;
-using SpawnDev.BlazorJS.BrowserExtension.JSObjects;
+using SpawnDev.BlazorJS.BrowserExtension;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
 using Tolerador.WebSiteExtensions;
 
@@ -32,7 +32,7 @@ namespace Tolerador.ExtensionContent
 
             // <span class="ytp-ad-preview-container ytp-ad-preview-container-detached modern-countdown-next-to-thumbnail" style=""><div class="ytp-ad-text ytp-ad-preview-text-modern" id="ad-text:3" style="">2</div><span class="ytp-ad-preview-image-modern"><img class="ytp-ad-image" id="ad-image:4" src="https://i.ytimg.com/vi/YIUJyJEZ-10/mqdefault_live.jpg" alt="" style=""></span></span>
 
-            SyncStorage = BrowserExtensionService.Chrome!.Storage!.Sync;
+            SyncStorage = BrowserExtensionService.Browser!.Storage!.Sync;
 
             VideoWebSiteExtension = new VideoWebSiteExtension(JS, BrowserExtensionService);
             VideoWebSiteExtension.OnWatchedNodesUpdated += VideoWebSiteExtension_OnWatchedNodesUpdated;

@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SpawnDev.BlazorJS;
-using SpawnDev.BlazorJS.BrowserExtension.JSObjects;
+using SpawnDev.BlazorJS.BrowserExtension;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
-using SpawnDev.BlazorJS.JSObjects;
 using Tolerador.WebSiteExtensions;
 
 namespace Tolerador.ExtensionContent
@@ -27,7 +26,7 @@ namespace Tolerador.ExtensionContent
         protected override async Task OnInitializedAsync()
         {
             Console.WriteLine($"{GetType().Name}.OnInitialized");
-            SyncStorage = BrowserExtensionService.Chrome!.Storage!.Sync;
+            SyncStorage = BrowserExtensionService.Browser!.Storage!.Sync;
 
             VideoWebSiteExtension = new VideoWebSiteExtension(JS, BrowserExtensionService);
             VideoWebSiteExtension.OnWatchedNodesUpdated += VideoWebSiteExtension_OnWatchedNodesUpdated;

@@ -19,7 +19,18 @@
         </svg>
         <div class="loading-progress-text"></div>
     </div>
-    <script src="app/_content/SpawnDev.BlazorJS.BrowserExtension/browser-polyfill.min.js"></script>
+
+    <script webworker-enabled src="_content/SpawnDev.BlazorJS.BrowserExtension/browser-polyfill.min.js"></script>
+
+    <!-- MessagePack -->
+    <script webworker-enabled src="_content/SpawnDev.BlazorJS.MessagePack/msgpack.min.js"></script>
+
+    <!-- SocketIO -->
+    <script webworker-enabled src="_content/SpawnDev.BlazorJS.SocketIO/socket.io.min.js"></script>
+
+    <!-- SimplePeer -->
+    <script webworker-enabled src="_content/SpawnDev.BlazorJS.SimplePeer/simplepeer.min.js"></script>
+
     <script src="background.common.js"></script>
     <!-- autostart is set to false so we can detect SIMD support and load the appropriate build -->
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>

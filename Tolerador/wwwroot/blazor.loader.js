@@ -1,5 +1,7 @@
+// Todd Tanner
+// 2024
+// This script detects simd support and loads an apropriate build of Blazor WASM
 "use strict";
-
 (async () => {
     var url = new URL(location.href);
     let verboseStart = url.searchParams.get('verboseStart') === '1';

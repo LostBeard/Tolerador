@@ -1,4 +1,4 @@
-﻿using SpawnDev.BlazorJS.BrowserExtension.JSObjects;
+﻿using SpawnDev.BlazorJS.BrowserExtension;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
 
 namespace Tolerador.Services
@@ -10,7 +10,7 @@ namespace Tolerador.Services
         public SyncStorageService(BrowserExtensionService browserExtensionService)
         {
             BrowserExtensionService = browserExtensionService;
-            SyncStorage = BrowserExtensionService.Chrome?.Storage?.Sync;
+            SyncStorage = BrowserExtensionService.Browser?.Storage?.Sync;
         }
     }
 }

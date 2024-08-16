@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SpawnDev.BlazorJS;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
+using SpawnDev.BlazorJS.SpeerNet;
+using SpawnDev.BlazorJS.Toolbox;
 using SpawnDev.BlazorJS.WebWorkers;
 using Tolerador;
 using Tolerador.Services;
@@ -18,6 +20,13 @@ var isRunningAsExtension = !string.IsNullOrEmpty(extensionId);
 JS.Log("Blazor loaded", JS.GlobalThisTypeName, builder.HostEnvironment.BaseAddress);
 JS.Log("Extension", isRunningAsExtension, extensionMode.ToString(), extensionId);
 
+// SpawnDev.BlazorJS[Toolbox]
+builder.Services.AddSingleton<MediaDevicesService>();
+// SpeerNet
+builder.Services.AddSingleton<DeviceIdentityService>();
+builder.Services.AddSingleton<SpeerNetService>();
+builder.Services.AddSingleton<DevicePairingService>();
+
 builder.Services.AddSingleton<BrowserExtensionService>();
 
 
@@ -26,17 +35,24 @@ builder.Services.AddSingleton<BrowserExtensionService>();
 // GlobalScope is set to all because is Firefox the background script runs in a window, and in Chrome the background script runs in a ServiceWorker
 // ExtensionServiceWorker can essentially ignore
 
-if (extensionMode == ExtensionMode.Background)
+//if (extensionMode == ExtensionMode.Background)
+//{
+//    // only used for extension background
+//    builder.Services.RegisterServiceWorker<BackgroundWorker>(GlobalScope.All, new ServiceWorkerConfig { Register = ServiceWorkerStartupRegistration.None });
+//}
+//else
+//{
+//    // when not in an extension BackgroundWorker is added as a regular singleton (it will auto-start though due being an IAsyncBackgroundService)
+//    builder.Services.AddSingleton<BackgroundWorker>();
+//}
+if (extensionMode == ExtensionMode.None)
 {
-    // only used for extension background
-    builder.Services.RegisterServiceWorker<BackgroundWorker>(GlobalScope.All, new ServiceWorkerConfig { Register = ServiceWorkerStartupRegistration.None });
+    builder.Services.RegisterServiceWorker<BackgroundWorker>(GlobalScope.All);
 }
 else
 {
-    // when not in an extension BackgroundWorker is added as a regular singleton (it will auto-start though due being an IAsyncBackgroundService)
-    builder.Services.AddSingleton<BackgroundWorker>();
+    builder.Services.RegisterServiceWorker<BackgroundWorker>(GlobalScope.All, new ServiceWorkerConfig { Register = ServiceWorkerStartupRegistration.None });
 }
-
 
 
 // browser extension service workers are registered via the manifest.json file so set Register = None

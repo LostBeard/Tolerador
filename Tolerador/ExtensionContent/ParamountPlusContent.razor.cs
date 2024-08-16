@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SpawnDev.BlazorJS;
-using SpawnDev.BlazorJS.BrowserExtension.JSObjects;
+using SpawnDev.BlazorJS.BrowserExtension;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
 using SpawnDev.BlazorJS.JSObjects;
 using Tolerador.WebSiteExtensions;
+using Window = SpawnDev.BlazorJS.JSObjects.Window;
 
 namespace Tolerador.ExtensionContent
 {
@@ -63,7 +64,7 @@ namespace Tolerador.ExtensionContent
         protected override async Task OnInitializedAsync()
         {
             Console.WriteLine($"{GetType().Name}.OnInitialized");
-            SyncStorage = BrowserExtensionService.Chrome!.Storage!.Sync;
+            SyncStorage = BrowserExtensionService.Browser!.Storage!.Sync;
             Document = JS.Get<Document>("document");
             Window = JS.Get<Window>("window");
             Window.OnResize += Window_OnResize;

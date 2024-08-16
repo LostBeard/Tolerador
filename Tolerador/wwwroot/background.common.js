@@ -10,52 +10,55 @@ browser.runtime.onInstalled.addListener(async (e) => {
     //});
 });
 browser.runtime.onStartup.addListener((e) => {
-    //console.log(`runtime.onStartup`, e);
+    console.log(`runtime.onStartup`, e);
 });
 browser.runtime.onSuspend.addListener((e) => {
-    //console.log(`runtime.onSuspend`, e);
+    console.log(`runtime.onSuspend`, e);
 });
 browser.windows.onCreated.addListener(function (window) {
-    //console.log('windows.onCreated', window);
+    console.log('windows.onCreated', window);
 });
 browser.windows.onRemoved.addListener(function (window) {
-    //console.log('windows.onRemoved', window);
+    console.log('windows.onRemoved', window);
 });
 // Tabs
 browser.tabs.onCreated.addListener(function (e) {
-    //console.log('tabs.onCreated', e);
+    console.log('tabs.onCreated', e);
 });
 browser.tabs.onRemoved.addListener(function (e) {
-    //console.log('tabs.onRemoved', e);
+    console.log('tabs.onRemoved', e);
 });
 browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-    //console.log('tabs.onUpdated', tabId, changeInfo, tab);
+    console.log('tabs.onUpdated', tabId, changeInfo, tab);
     // changeInfo object: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/onUpdated#changeInfo
     if (changeInfo.status === 'complete') {
         // below throws an error if not listening in a content script
         //chrome.tabs.sendMessage(tabId, {
         //    message: 'TabUpdated 111'
         //});
+        // chrome-extension://
+        // lookign for tabs that are showing an error page due to routing issues and our extension
+        console.log('tabs.onUpdated::complete', tabId, tab.url);
     }
 });
 // WebNavigation
 chrome.webNavigation.onBeforeNavigate.addListener((e) => {
-    //console.log('onBeforeNavigate', e);
+    console.log('onBeforeNavigate', e);
 });
 chrome.webNavigation.onCommitted.addListener((e) => {
-    //console.log('onCommitted', e);
+    console.log('onCommitted', e);
 });
 chrome.webNavigation.onDOMContentLoaded.addListener((e) => {
-    //console.log('onDOMContentLoaded', e);
+    console.log('onDOMContentLoaded', e);
 });
 chrome.webNavigation.onCompleted.addListener((e) => {
-    //console.log('onCompleted', e);
+    console.log('onCompleted', e);
 });
 chrome.webNavigation.onReferenceFragmentUpdated.addListener((details) => {
-    //console.log('onReferenceFragmentUpdated', details);
+    console.log('onReferenceFragmentUpdated', details);
 });
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-    //console.log('onHistoryStateUpdated', details);
+    console.log('onHistoryStateUpdated', details);
 });
 //chrome.webRequest.onHeadersReceived.addListener((details) => {
 //    console.log('onHeadersReceived', details);
@@ -116,9 +119,10 @@ async function patchCSP(request, sender) {
 }
 // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage
 browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.cspViolation) {
-        patchCSP(request, sender);
-    }
+    console.log('bg.onMessage >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', request, sender, sendResponse);
+    //if (request.cspViolation) {
+    //    patchCSP(request, sender);
+    //}
 });
 async function getFreeSessionRuleId() {
     var previousRules = await browser.declarativeNetRequest.getDynamicRules();
