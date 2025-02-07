@@ -1,7 +1,7 @@
-﻿namespace Tolerador.ServiceWorkers
+﻿namespace Tolerador.Background
 {
     /// <summary>
-    /// Message used when reporting a failed Blazor sart due to a CSP violation
+    /// Message used when reporting a failed Blazor start due to a CSP violation
     /// </summary>
     public class CSPViolation
     {

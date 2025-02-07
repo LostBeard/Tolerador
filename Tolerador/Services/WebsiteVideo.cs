@@ -1,31 +1,10 @@
-﻿using Microsoft.JSInterop;
-using SpawnDev.BlazorJS;
-using SpawnDev.BlazorJS.BrowserExtension;
-using SpawnDev.BlazorJS.BrowserExtension.Services;
+﻿using SpawnDev.BlazorJS.BrowserExtension.Services;
 using SpawnDev.BlazorJS.JSObjects;
+using SpawnDev.BlazorJS;
 
-namespace Tolerador.ExtensionContent
+namespace Tolerador.Services
 {
-    /// <summary>
-    /// This class will be accessed via a the content-bridge
-    /// </summary>
-    public class ParamountPlusPlayer : JSObject
-    {
-        public ParamountPlusPlayer(IJSInProcessObjectReference _ref) : base(_ref) { }
-        public List<ParamountPlayerAdBreak>? GetAdBreakTimes()
-        {
-            // call getAdBreakTimes and unwrap the return value
-            using var ads = JSRef!.Call<WrappedObjectProxy>("getAdBreakTimes");
-            var ret = ads == null ? null : ads.WrappedObjectDirect<List<ParamountPlayerAdBreak>>();
-            ads?.WrappedObjectRelease();
-            return ret;
-        }
-        /// <summary>
-        /// Returns the video element that player belongs to via a proxy (as this is also proxy)
-        /// </summary>
-        public HTMLVideoElement Video => JSRef!.Get<HTMLVideoElement>("video");
-    }
-    public class ParamountPlusVideo : IDisposable
+    public class WebsiteVideo : IDisposable
     {
         public const string VideoIdTag = "__extensionVideoId";
         public static string? GetVideoElementVideoId(HTMLVideoElement videoElement) => videoElement.JSRef!.Get<string?>(VideoIdTag);
@@ -34,19 +13,17 @@ namespace Tolerador.ExtensionContent
         BlazorJSRuntime JS;
         ContentBridgeService ContentBridge;
         public HTMLVideoElement VideoElement { get; private set; }
-        public ParamountPlusPlayer? Player { get; private set; }
-        public List<ParamountPlayerAdBreak> AdBreaks { get; private set; } = new List<ParamountPlayerAdBreak>();
-        public ParamountPlusVideo(string videoId, HTMLVideoElement videoElement, ContentBridgeService contentBridge, BlazorJSRuntime js)
+        public double CurrentTime { get; set; }
+        public WebsiteVideo(string videoId, HTMLVideoElement videoElement, ContentBridgeService contentBridge, BlazorJSRuntime js)
         {
             VideoId = videoId;
             JS = js;
             ContentBridge = contentBridge;
             VideoElement = videoElement;
-            Player = GetParamountPlusPlayer(VideoElement, ContentBridge);
             AttachVideoElementEvents();
             UpdateVideoElement();
         }
-        public ParamountPlusVideo(HTMLVideoElement videoElement, ContentBridgeService contentBridge, BlazorJSRuntime js)
+        public WebsiteVideo(HTMLVideoElement videoElement, ContentBridgeService contentBridge, BlazorJSRuntime js)
         {
             VideoId = GetVideoElementVideoId(videoElement) ?? "";
             if (string.IsNullOrEmpty(VideoId))
@@ -57,30 +34,8 @@ namespace Tolerador.ExtensionContent
             JS = js;
             ContentBridge = contentBridge;
             VideoElement = videoElement;
-            Player = GetParamountPlusPlayer(VideoElement, ContentBridge);
             AttachVideoElementEvents();
             UpdateVideoElement();
-        }
-        public static ParamountPlusPlayer? GetParamountPlusPlayer(HTMLVideoElement videoElement, ContentBridgeService contentBridge)
-        {
-            try
-            {
-                // get videoElement from the main side so the javascript properties are available
-                using var el = contentBridge.SyncDispatcher.GetDocumentElementRemote(videoElement);
-                if (el != null)
-                {
-                    var player = el.JSRef!.Get<ParamountPlusPlayer?>("player");
-                    el.WrappedObjectRelease();
-                    return player;
-                }
-            }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Console.WriteLine($"GetParamountPlusPlayer failed: {ex.Message}");
-#endif
-            }
-            return null;
         }
         void AttachVideoElementEvents()
         {
@@ -91,6 +46,8 @@ namespace Tolerador.ExtensionContent
             VideoElement.OnVolumeChange += VideoElement_OnVolumeChange;
             VideoElement.OnDurationChange += VideoElement_OnDurationChange;
             VideoElement.OnTimeUpdate += VideoElement_OnTimeUpdate;
+            VideoElement.OnEmptied += VideoElement_OnEmptied;
+            VideoElement.OnEnded += VideoElement_OnEnded;
         }
         void DetachVideoElementEvents()
         {
@@ -101,19 +58,14 @@ namespace Tolerador.ExtensionContent
             VideoElement.OnVolumeChange -= VideoElement_OnVolumeChange;
             VideoElement.OnDurationChange -= VideoElement_OnDurationChange;
             VideoElement.OnTimeUpdate -= VideoElement_OnTimeUpdate;
+            VideoElement.OnEmptied -= VideoElement_OnEmptied;
+            VideoElement.OnEnded -= VideoElement_OnEnded;
         }
-
         public bool IsDisposed { get; private set; } = false;
         public void Dispose()
         {
             if (IsDisposed) return;
             IsDisposed = true;
-            if (Player != null)
-            {
-                Player.WrappedObjectRelease();
-                Player.Dispose();
-                Player = null;
-            }
             if (VideoElement != null)
             {
                 // detach events 
@@ -123,15 +75,19 @@ namespace Tolerador.ExtensionContent
         }
         void UpdateVideoElement()
         {
-            if (Player != null)
-            {
-                var ads = Player.GetAdBreakTimes();
-                JS.Log("__ads", ads);
-                if (ads != null)
-                {
-                    AdBreaks = ads;
-                }
-            }
+
+        }
+        void VideoElement_OnEnded(Event e)
+        {
+            JS.Log("VideoElement_OnEnded", VideoId);
+            // get the video element proxy for website side of given element
+            UpdateVideoElement();
+        }
+        void VideoElement_OnEmptied(Event e)
+        {
+            JS.Log("VideoElement_OnEmptied", VideoId);
+            // get the video element proxy for website side of given element
+            UpdateVideoElement();
         }
         void VideoElement_OnLoadedMetadata(Event e)
         {
@@ -141,7 +97,7 @@ namespace Tolerador.ExtensionContent
         }
         void VideoElement_OnTimeUpdate(Event e)
         {
-            //JS.Log("VideoElement_OnTimeUpdate", videoId, videoElement.CurrentTime, videoElement.Duration);
+            
         }
         void VideoElement_OnDurationChange(Event e)
         {

@@ -5,15 +5,10 @@ using SpawnDev.BlazorJS.BrowserExtension.Services;
 using SpawnDev.BlazorJS.JSObjects;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Tolerador.Services;
 
 namespace Tolerador.Layout
 {
-    public class ContentRouteInfo
-    {
-        public Assembly Assembly { get; init; }
-        public Type ComponentType { get; init; }
-        public List<ContentLocationAttribute> ContentLocations { get; init; }
-    }
     public partial class ContentOverlay
     {
         [Parameter]
@@ -27,11 +22,17 @@ namespace Tolerador.Layout
         [Parameter]
         public IEnumerable<Assembly> AdditionalAssemblies { get; set; }
 
-        [Inject] BrowserExtensionService BrowserExtensionService { get; set; }
+        [Inject]
+        VideoExtension VideoExtension { get; set; }
+
+        [Inject] 
+        BrowserExtensionService BrowserExtensionService { get; set; }
 
         public Dictionary<string, object> ContentParameters { get; set; } = new Dictionary<string, object>();
 
         Type? ContentType { get; set; }
+
+        DynamicComponent? dynamicComponent = null;
 
         bool BeenInit = false;
         public ContentOverlayRouteInfo? ContentOverlayRouteInfo { get; private set; }
@@ -44,12 +45,22 @@ namespace Tolerador.Layout
                 CacheRoutes();
                 ContentOverlayUpdate();
                 BrowserExtensionService.OnLocationChanged += BrowserExtensionService_OnLocationChanged;
+
+                VideoExtension.OnVideoCountChanged += VideoExtension_OnVideoCountChanged;
+                VideoExtension.OnVideoStateChanged += VideoExtension_OnVideoStateChanged;
             }
+        }
+        private void VideoExtension_OnVideoStateChanged()
+        {
+            StateHasChanged();
+        }
+        private void VideoExtension_OnVideoCountChanged()
+        {
+            StateHasChanged();
         }
         protected override async Task OnInitializedAsync()
         {
             HideContent = await SyncStorage.Get<bool>($"{GetType().Name}_{nameof(HideContent)}", true);
-
         }
         async Task Clicked(MouseEventArgs mouseEventArgs)
         {

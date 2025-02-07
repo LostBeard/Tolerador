@@ -5,8 +5,6 @@ VisualStudioVersion = 17.10.34707.107
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tolerador", "Tolerador\Tolerador.csproj", "{1003DFB6-3007-43E2-A471-A486374447BC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpawnDev.BlazorJS.SpeerNet", "..\..\SpawnDev.OmniClops\SpawnDev.OmniClops\SpawnDev.BlazorJS.SpeerNet\SpawnDev.BlazorJS.SpeerNet.csproj", "{C060FA7A-F674-4349-B136-4DA82D2394AF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{1003DFB6-3007-43E2-A471-A486374447BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1003DFB6-3007-43E2-A471-A486374447BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1003DFB6-3007-43E2-A471-A486374447BC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C060FA7A-F674-4349-B136-4DA82D2394AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C060FA7A-F674-4349-B136-4DA82D2394AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C060FA7A-F674-4349-B136-4DA82D2394AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C060FA7A-F674-4349-B136-4DA82D2394AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

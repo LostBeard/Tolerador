@@ -1,14 +1,21 @@
 {
   "name": "Tolerador",
-  "description": "Media stream configurator.",
-  "version": "1.0.13",
+  "description": "Automatically mute ads on Netflix, YouTub, Disney, and Paramount streaming services",
+  "version": "1.0.1",
   "manifest_version": 3,
+  "icons": {
+    "16": "app/icon-16.png",
+    "32": "app/favicon.png",
+    "48": "app/icon-48.png",
+    "128": "app/icon-128.png",
+    "192": "app/icon-192.png"
+  },
   "action": {
-    "default_popup": "app/popup.html",
+    "default_popup": "app/index.html?$=popup",
     "default_icon": "app/icon-192.png"
   },
   "options_ui": {
-    "page": "app/options.html",
+    "page": "app/index.html?$=options",
     "open_in_tab": true
   },
   "background": {

@@ -2,18 +2,18 @@
 using SpawnDev.BlazorJS;
 using SpawnDev.BlazorJS.BrowserExtension;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
+using SpawnDev.BlazorJS.JSObjects;
 using Tolerador.WebSiteExtensions;
 
 namespace Tolerador.ExtensionContent
 {
     public partial class YouTubeContent : IDisposable
     {
+        [Inject]
+        BlazorJSRuntime JS { get; set; } = default!;
 
         [Inject]
-        BlazorJSRuntime JS { get; set; }
-
-        [Inject]
-        BrowserExtensionService BrowserExtensionService { get; set; }
+        BrowserExtensionService BrowserExtensionService { get; set; } = default!;
 
         VideoWebSiteExtension? VideoWebSiteExtension = null;
 
@@ -37,85 +37,112 @@ namespace Tolerador.ExtensionContent
             VideoWebSiteExtension = new VideoWebSiteExtension(JS, BrowserExtensionService);
             VideoWebSiteExtension.OnWatchedNodesUpdated += VideoWebSiteExtension_OnWatchedNodesUpdated;
             VideoWebSiteExtension.WatchNodes = new List<WatchNode>
-                {
-                    // ytp-skip-ad-button
-                    new WatchNode("skipAd", "button.ytp-skip-ad-button", checkVisibility: true),
-                    new WatchNode("skipAd2", "button.ytp-ad-skip-button-modern", checkVisibility: true),
-                    // 
-                    new WatchNode("video", "video", checkVisibility: true),
-                    new WatchNode("play", "button.ytp-play-button", checkVisibility: true),
-                    new WatchNode("pause", "button.ytp-pause-button", checkVisibility: true),
-                    new WatchNode("ad-indicator", ".ytp-ad-preview-container", checkVisibility: true),
-                    new WatchNode("mute", "button.ytp-mute-button", checkVisibility: true),
-                    //new WatchNode("mute-on", "button.mute-btn--on"),
-                    //new WatchNode("mute-off", "button.mute-btn--off"),
-                    //new WatchNode("fullscreen", "button.fullscreen-icon"),
-                    //new WatchNode("exit-fullscreen", "button.exit-fullscreen-icon"),
-                    //new WatchNode("restart", "button.play-from-start-icon"),
-                };
+            {
+                new WatchNode("video", "ytd-player video", checkVisibility: true),
+                new WatchNode("skipAd", "ytd-player .video-ads button.ytp-skip-ad-button", checkVisibility: true),
+                new WatchNode("skipAd2", "ytd-player .video-ads button.ytp-ad-skip-button-modern", checkVisibility: true),
+                new WatchNode("ad-indicator", "ytd-player .video-ads button", checkVisibility: true),
+                new WatchNode("play", "ytd-player button.ytp-play-button[data-title-no-tooltip=\"Play\"]"),
+                new WatchNode("pause", "ytd-player button.ytp-play-button[data-title-no-tooltip=\"Pause\"]"),
+                new WatchNode("unmute-button", "ytd-player button.ytp-mute-button[data-title-no-tooltip=\"Unmute\"]"),
+                new WatchNode("mute-button", "ytd-player button.ytp-mute-button[data-title-no-tooltip=\"Mute\"]"),
+                new WatchNode("mute", "ytd-player button.ytp-mute-button"),
+                //new WatchNode("restart", "button.play-from-start-icon"),
+                //new WatchNode("mute", "button.mute-btn"),
+                //new WatchNode("mute-on", "button.mute-btn--on"),
+                //new WatchNode("mute-off", "button.mute-btn--off"),
+                //new WatchNode("video", "disney-web-player video", true){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                //new WatchNode("fullscreen", "toggle-fullscreen-button info-tooltip button.fullscreen-icon"){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                //new WatchNode("exit-fullscreen", "toggle-fullscreen-button info-tooltip button.exit-fullscreen-icon"){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                //new WatchNode("play", "toggle-play-pause info-tooltip button.play-button"){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                //new WatchNode("pause", "toggle-play-pause info-tooltip button.pause-button"){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                //new WatchNode("ad-indicator", ".overlay_interstitials"),
+            };
 
             VideoWebSiteExtension.MuteAds = await SyncStorage.Get<bool>($"{nameof(YouTubeContent)}_MuteAds", true);
             VideoWebSiteExtension.SkipAds = await SyncStorage.Get<bool>($"{nameof(YouTubeContent)}_SkipAds", true);
+            if (VideoWebSiteExtension.LocationSupported)
+            {
+                VideoWebSiteExtension.WatchedNodesUpdate();
+            }
         }
         async Task MuteAds_OnClicked(int index)
         {
             VideoWebSiteExtension!.MuteAds = index == 1;
             await SyncStorage.Set($"{nameof(YouTubeContent)}_MuteAds", VideoWebSiteExtension.MuteAds);
-            Console.WriteLine($"VideoWebSiteExtension.MuteAds: {VideoWebSiteExtension.MuteAds}");
+            Console.WriteLine($"{nameof(YouTubeContent)}_MuteAds: {VideoWebSiteExtension.MuteAds}");
         }
         async Task SkipAds_OnClicked(int index)
         {
             VideoWebSiteExtension!.SkipAds = index == 1;
             await SyncStorage.Set($"{nameof(YouTubeContent)}_SkipAds", VideoWebSiteExtension.SkipAds);
-            Console.WriteLine($"DisneyPlusExtension.SkipAds: {VideoWebSiteExtension.SkipAds}");
+            Console.WriteLine($"{nameof(YouTubeContent)}_SkipAds: {VideoWebSiteExtension.SkipAds}");
         }
 
         public void Dispose()
         {
-            Console.WriteLine("YouTubeContent.Dispose");
+            Console.WriteLine($"{nameof(YouTubeContent)}.Dispose");
             if (VideoWebSiteExtension != null)
             {
 
                 VideoWebSiteExtension.Dispose();
             }
         }
-
         private void VideoWebSiteExtension_OnWatchedNodesUpdated(List<string> changedWatchNodes)
         {
             if (changedWatchNodes.Count == 0) return;
+            StateHasChanged();
             var videoFound = VideoWebSiteExtension!.Found("video");
-            if (!videoFound)
-            {
-                return;
-            }
             var skipAd = VideoWebSiteExtension.Found("skipAd");
             var skipAd2 = VideoWebSiteExtension.Found("skipAd2");
             var ad = VideoWebSiteExtension.Found("ad-indicator") || skipAd || skipAd2;
             var muted = VideoWebSiteExtension.Muted;
-            var playing = VideoWebSiteExtension.Playing;
-            if (playing && ad)
+            JS.Log(new
             {
-                if (VideoWebSiteExtension.SkipAds)
-                {
-                    Console.WriteLine("- Skipping ad");
-                    if (skipAd) VideoWebSiteExtension.ClickWatchedNodeButton("skipAd");
-                    else if (skipAd2) VideoWebSiteExtension.ClickWatchedNodeButton("skipAd2");
-                }
+                videoFound = videoFound,
+                ad = ad,
+                skipAd = skipAd,
+                muted = muted,
+            });
+            if (!videoFound)
+            {
+                return;
             }
-            if (ad && !muted)
+            if (ad && VideoWebSiteExtension.MuteAds && !muted)
             {
-                if (VideoWebSiteExtension.MuteAds)
-                {
-                    Console.WriteLine("- Setting muted");
-                    VideoWebSiteExtension.Muted = true;
-                }
+                Console.WriteLine("- Setting muted");
+                VideoWebSiteExtension.Muted = true;
             }
-            else if (!ad && muted)
+            if (!ad && VideoWebSiteExtension.MuteAds && muted)
             {
-                if (VideoWebSiteExtension.MuteAds)
+                Console.WriteLine("- Setting unmuted");
+                VideoWebSiteExtension.Muted = false;
+            }
+            if (ad && VideoWebSiteExtension.SkipAds)
+            {
+                Console.WriteLine("- Skipping ad");
+                SkipAd();
+            }
+        }
+        void SkipAd()
+        {
+            using var video = VideoWebSiteExtension?.GetWatchNodeEl<HTMLVideoElement>("video");
+            if (video == null)
+            {
+                JS.Log("SkipAd video not found");
+                return;
+            }
+            JS.Log("SkipAd video found");
+            var duration = video.Duration;
+            JS.Log("SkipAd video duration", duration);
+            if (duration != null)
+            {
+                var currentTime = video.CurrentTime;
+                var endTime = duration.Value - 1;
+                if (currentTime < endTime)
                 {
-                    Console.WriteLine("- Setting unmuted");
-                    VideoWebSiteExtension.Muted = false;
+                    JS.Log("SkipAd setting currentTime", endTime);
+                    video.CurrentTime = endTime;
                 }
             }
         }

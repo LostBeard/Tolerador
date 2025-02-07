@@ -1,7 +1,13 @@
 // Todd Tanner
 // 2024
-// This script detects simd support and loads an apropriate build of Blazor WASM
+// This script detects simd support and loads a compatible build of Blazor
 "use strict";
+
+// Blazor WASM will fail to load if BigInt64Array or BigUint64Array are not found, but it does not use them on startup
+// This fix was added to enable support for Safari 14 and 15 which do not support BigInt64Array or BigUint64Array
+if (!globalThis.BigInt64Array) globalThis.BigInt64Array = function () { };
+if (!globalThis.BigUint64Array) globalThis.BigUint64Array = function () { };
+
 (async () => {
     var url = new URL(location.href);
     let verboseStart = url.searchParams.get('verboseStart') === '1';
@@ -11,9 +17,8 @@
     // compat mode build could be built without wasm exception support if needed and detected here
     var supportsExceptions = await wasmFeatureDetect.exceptions();
     if (verboseStart) console.log('supportsExceptions', supportsExceptions);
-    var compatModeAvailable = true; // published !== false;    // requires service-worker.js which has 2 versions; 1 for development and one for when published. used to set published to true in the published version and false in the development version.
-    var useCompatMode = !supportsSimd && compatModeAvailable;
-    if (forceCompatMode && compatModeAvailable) {
+    var useCompatMode = !supportsExceptions || !supportsSimd;
+    if (forceCompatMode) {
         if (verboseStart) console.log('forceCompatMode', forceCompatMode);
         useCompatMode = true;
     }
@@ -25,7 +30,7 @@
             if (script.src.indexOf('_framework/blazor.webassembly.js') !== -1) return 'wasm';
         }
         return '';
-    }
+    };
     var runtimeType = getRuntimeType();
     // customize the resource loader for the runtime that is loaded
     // https://learn.microsoft.com/en-us/aspnet/core/blazor/fundamentals/startup?view=aspnetcore-8.0#load-boot-resources
@@ -51,4 +56,3 @@
         Blazor.start(webAssemblyConfig);
     }
 })();
-    

@@ -24,16 +24,6 @@
 
     <!-- Browser polyfill will throw an error if not running in an extension -->
 
-
-    <!-- MessagePack -->
-    <script webworker-enabled src="_content/SpawnDev.BlazorJS.MessagePack/msgpack.min.js"></script>
-
-    <!-- SocketIO -->
-    <script webworker-enabled src="_content/SpawnDev.BlazorJS.SocketIO/socket.io.min.js"></script>
-
-    <!-- SimplePeer -->
-    <script webworker-enabled src="_content/SpawnDev.BlazorJS.SimplePeer/simplepeer.min.js"></script>
-
     <!-- autostart is set to false so we can detect SIMD support and load the appropriate build -->
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
     <!--
@@ -41,7 +31,7 @@
         CDN UMD Version: https://unpkg.com/wasm-feature-detect/dist/umd/index.js
         Repo: https://github.com/GoogleChromeLabs/wasm-feature-detect
     -->
-    <script webworker-enabled src="wasm-feature-detect.1.6.1.js"></script>
+    <script webworker-enabled src="wasm-feature-detect.1.8.0.js"></script>
     <!--
         The below script tag is used to detect SIMD support on the running device and load the appropriate build
         If SIMD is not supported it loads _frameworkCompat/ instead of _framework/

@@ -9,7 +9,7 @@ using Window = SpawnDev.BlazorJS.JSObjects.Window;
 
 namespace Tolerador.ExtensionContent
 {
-    public partial class ParamountPlusContent : IDisposable
+    public partial class ParamountPlus : IDisposable
     {
         [Inject]
         BlazorJSRuntime JS { get; set; }
@@ -99,9 +99,10 @@ namespace Tolerador.ExtensionContent
                 // <button type="button" class="skip-button" tabindex="0" aria-label="Skip Intro" style="display: block; margin-right: 40px !important;"><div class="skip-button__layout"><div class="icon-container skip-button__icon" style="width: 13px;"><div class="svg-container"><svg viewBox="0 0 39 21" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.5 10.5L14.6774 9.3039L2.5 1.3125L0.5 0V2.39221V18.6078V21L2.5 19.6875L14.6774 11.6961L16.5 10.5ZM12.8547 10.5L2.5 3.70471V17.2953L12.8547 10.5ZM34.5 10.5L32.6774 9.3039L20.5 1.3125L18.5 0V2.39221V18.6078V21L20.5 19.6875L32.6774 11.6961L34.5 10.5ZM30.8547 10.5L20.5 3.70471V17.2953L30.8547 10.5ZM36.5 0H38.5V2V19V21H36.5V19V2V0Z" fill="white"></path></svg></div></div><span class="skip-button__text">SKIP</span></div></button>
 
                 // <div class="controls-time-wrapper show controls--md-margin" aria-hidden="false"><div class="controls-progress-time">00:32</div><div class="controls-duration">46:31</div></div>
-
+                new WatchNode("ad-indicator", "div[data-role=\"adContainer\"]", checkVisibility: true),
                 new WatchNode("video", "video", checkVisibility: true),
                 new WatchNode("skipAd", "button.skip-button", checkVisibility: true),
+                new WatchNode("skipIntro", "button.skip-button[aria-label=\"Skip Intro\"]", checkVisibility: true),
                 new WatchNode("play", "button.btn-play-pause"),
                 new WatchNode("fullscreen", "button.btn-fullscreen"),
                 new WatchNode("mute", "button.btn-volume"),

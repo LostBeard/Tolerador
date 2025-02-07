@@ -3,8 +3,8 @@
 browser.runtime.onInstalled.addListener(async (e) => {
     console.log('runtime.onInstalled', e);
     // if an app component is found that points to installed.html it will be opened on the onInstalled event
-    // load installed page 
-    //const indexPageUrl = browser.runtime.getURL("app/installed.html");
+    // load installed page
+    //const indexPageUrl = browser.runtime.getURL("app/index.html?_route=popup");
     //browser.tabs.create({
     //    url: indexPageUrl
     //});
@@ -67,6 +67,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
 async function shouldPatchCSPCheck(url) {
     return true;
 }
+// now handled in Blazor
 async function patchCSP(request, sender) {
     if (request.cspViolation) {
         var originalPolicy = request.cspViolation.originalPolicy;

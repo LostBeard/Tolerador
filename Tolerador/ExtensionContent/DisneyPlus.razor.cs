@@ -2,6 +2,7 @@
 using SpawnDev.BlazorJS;
 using SpawnDev.BlazorJS.BrowserExtension;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
+using SpawnDev.BlazorJS.JSObjects;
 using Tolerador.WebSiteExtensions;
 
 namespace Tolerador.ExtensionContent
@@ -10,10 +11,10 @@ namespace Tolerador.ExtensionContent
     {
 
         [Inject]
-        BlazorJSRuntime JS { get; set; }
+        BlazorJSRuntime JS { get; set; } = default!;
 
         [Inject]
-        BrowserExtensionService BrowserExtensionService { get; set; }
+        BrowserExtensionService BrowserExtensionService { get; set; } = default!;
 
         VideoWebSiteExtension? VideoWebSiteExtension = null;
 
@@ -25,7 +26,7 @@ namespace Tolerador.ExtensionContent
 
         protected override async Task OnInitializedAsync()
         {
-            Console.WriteLine("YouTubeContent.OnInitialized");
+            Console.WriteLine("DisneyPlus.OnInitialized");
             // video-ads
             // ytp-ad-preview-container
             // "ytp-ad-skip-button-modern ytp-button"
@@ -37,40 +38,25 @@ namespace Tolerador.ExtensionContent
             VideoWebSiteExtension = new VideoWebSiteExtension(JS, BrowserExtensionService);
             VideoWebSiteExtension.OnWatchedNodesUpdated += VideoWebSiteExtension_OnWatchedNodesUpdated;
             VideoWebSiteExtension.WatchNodes = new List<WatchNode>
-                {
-                    new WatchNode("restart", "button.play-from-start-icon"),
-                    new WatchNode("mute", "button.mute-btn"),
-                    new WatchNode("mute-on", "button.mute-btn--on"),
-                    new WatchNode("mute-off", "button.mute-btn--off"),
-                    new WatchNode("video", (d)=>{
-                        // document.querySelector('disney-web-player').shadowRoot.querySelector('video')
-                        using var webPlayer = d.QuerySelector("disney-web-player");
-                        if (webPlayer == null) return null;
-                        using var shadowRoot = webPlayer.ShadowRoot;
-                        if (shadowRoot == null) return null;
-                        var videoEl = shadowRoot.QuerySelector("video");
-                        return videoEl;
-                    }),
-                    new WatchNode("fullscreen", "button.fullscreen-icon"),
-                    new WatchNode("exit-fullscreen", "button.exit-fullscreen-icon"),
-                    new WatchNode("play", "button.play-icon"),
-                    new WatchNode("pause", "button.pause-icon"),
-                    new WatchNode("ad-indicator", ".overlay_interstitials"),
-                    //new WatchNode("skipAd", "button.ytp-ad-skip-button-modern", checkVisibility: true),
-                    //new WatchNode("video", "video", checkVisibility: true),
-                    //new WatchNode("play", "button.ytp-play-button", checkVisibility: true),
-                    //new WatchNode("pause", "button.ytp-pause-button", checkVisibility: true),
-                    //new WatchNode("ad-indicator", ".ytp-ad-preview-container", checkVisibility: true),
-                    //new WatchNode("mute", "button.ytp-mute-button", checkVisibility: true),
-                    //new WatchNode("mute-on", "button.mute-btn--on"),
-                    //new WatchNode("mute-off", "button.mute-btn--off"),
-                    //new WatchNode("fullscreen", "button.fullscreen-icon"),
-                    //new WatchNode("exit-fullscreen", "button.exit-fullscreen-icon"),
-                    //new WatchNode("restart", "button.play-from-start-icon"),
-                };
+            {
+                new WatchNode("restart", "button.play-from-start-icon"),
+                new WatchNode("mute", "button.mute-btn"),
+                new WatchNode("mute-on", "button.mute-btn--on"),
+                new WatchNode("mute-off", "button.mute-btn--off"),
+                new WatchNode("video", "disney-web-player video", true){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                new WatchNode("fullscreen", "toggle-fullscreen-button info-tooltip button.fullscreen-icon"){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                new WatchNode("exit-fullscreen", "toggle-fullscreen-button info-tooltip button.exit-fullscreen-icon"){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                new WatchNode("play", "toggle-play-pause info-tooltip button.play-button"){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                new WatchNode("pause", "toggle-play-pause info-tooltip button.pause-button"){ ShadowRootQueryMode = ShadowRootQueryMode.Wide },
+                new WatchNode("ad-indicator", ".overlay_interstitials"),
+            };
 
             VideoWebSiteExtension.MuteAds = await SyncStorage.Get<bool>($"{nameof(DisneyPlus)}_MuteAds", true);
             VideoWebSiteExtension.SkipAds = await SyncStorage.Get<bool>($"{nameof(DisneyPlus)}_SkipAds", true);
+            if (VideoWebSiteExtension.LocationSupported)
+            {
+                VideoWebSiteExtension.WatchedNodesUpdate();
+            }
         }
         async Task MuteAds_OnClicked(int index)
         {
@@ -94,21 +80,18 @@ namespace Tolerador.ExtensionContent
                 VideoWebSiteExtension.Dispose();
             }
         }
-
+        bool AdShowing = false;
         private void VideoWebSiteExtension_OnWatchedNodesUpdated(List<string> changedWatchNodes)
         {
             if (changedWatchNodes.Count == 0) return;
+            StateHasChanged();
             var videoFound = VideoWebSiteExtension!.Found("video");
-            var playing = VideoWebSiteExtension.Playing;
-
             var skipAd = VideoWebSiteExtension.Found("skipAd");
             var ad = VideoWebSiteExtension.Found("ad-indicator") || skipAd;
             var muted = VideoWebSiteExtension.Muted;
-
             JS.Log(new
             {
                 videoFound = videoFound,
-                playing = playing,
                 ad = ad,
                 skipAd = skipAd,
                 muted = muted,
@@ -117,38 +100,51 @@ namespace Tolerador.ExtensionContent
             {
                 return;
             }
-            if (!playing)
+            var adStateChanged = AdShowing != ad;
+            if (AdShowing != ad)
             {
-                return;
-            }
-
-            if (playing && ad && skipAd)
-            {
-                Console.WriteLine("- Skipping ad ??");
-                if (VideoWebSiteExtension.SkipAds)
+                AdShowing = ad;
+                if (ad && !muted)
                 {
-                    Console.WriteLine("- Skipping ad");
-                    VideoWebSiteExtension.SkipAd();
+                    Console.WriteLine("- Setting muted ??");
+                    if (VideoWebSiteExtension.MuteAds)
+                    {
+                        Console.WriteLine("- Setting muted");
+                        VideoWebSiteExtension.Muted = true;
+                    }
+                }
+                else if (!ad && muted)
+                {
+                    Console.WriteLine("- Setting unmuted??");
+                    if (VideoWebSiteExtension.MuteAds)
+                    {
+                        Console.WriteLine("- Setting unmuted");
+                        VideoWebSiteExtension.Muted = false;
+                    }
                 }
             }
-            else if (playing && ad && !muted)
+            using var video = VideoWebSiteExtension?.GetWatchNodeEl<HTMLVideoElement>("video");
+            if (video != null)
             {
-                Console.WriteLine("- Setting muted ??");
-                if (VideoWebSiteExtension.MuteAds)
+                if (ad && VideoWebSiteExtension!.SkipAds)
                 {
-                    Console.WriteLine("- Setting muted");
-                    VideoWebSiteExtension.Muted = true;
+                    if (video.PlaybackRate != AdPlaybackRate)
+                    {
+                        Console.WriteLine("- Skipping ad via playback rate");
+                        video.PlaybackRate = AdPlaybackRate;
+                    }
                 }
-            }
-            else if (playing && !ad && muted)
-            {
-                Console.WriteLine("- Setting unmuted??");
-                if (VideoWebSiteExtension.MuteAds)
+                else
                 {
-                    Console.WriteLine("- Setting unmuted");
-                    VideoWebSiteExtension.Muted = false;
+                    if (video.PlaybackRate != DefaultPlaybackRate)
+                    {
+                        Console.WriteLine("- Resetting playback rate");
+                        video.PlaybackRate = DefaultPlaybackRate;
+                    }
                 }
             }
         }
+        float AdPlaybackRate = 16;
+        float DefaultPlaybackRate = 1;
     }
 }

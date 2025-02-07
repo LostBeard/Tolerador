@@ -1,6 +1,6 @@
 ﻿using SpawnDev.BlazorJS.JSObjects;
 
-namespace Tolerador
+namespace Tolerador.Services
 {
     public static class HTMLVideoElementExtensions
     {

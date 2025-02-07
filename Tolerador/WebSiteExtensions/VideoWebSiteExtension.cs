@@ -1,6 +1,7 @@
 ﻿using SpawnDev.BlazorJS;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
 using SpawnDev.BlazorJS.JSObjects;
+using Tolerador.Services;
 
 namespace Tolerador.WebSiteExtensions
 {
@@ -44,14 +45,26 @@ namespace Tolerador.WebSiteExtensions
             using var el = GetWatchNodeEl<HTMLButtonElement>("fullscreen");
             el?.Click();
         }
-        public void SkipAd()
+        public virtual void SkipAd()
         {
-            using var el = GetWatchNodeEl<HTMLButtonElement>("skipAd");
+            var wNode = WatchNodes.FirstOrDefault(o => o.Name.StartsWith("skipAd") && o.Found);
+            if (wNode == null) return;
+            using var el = GetWatchNodeEl<HTMLButtonElement>(wNode.Name);
             el?.Click();
         }
         public void ClickWatchedNodeButton(string name)
         {
             using var el = GetWatchNodeEl<HTMLButtonElement>(name);
+            JS.Log("el1", el);
+            JS.Set("el1", el);
+            if (el == null)
+            {
+                Console.WriteLine($"el not found: {name}");
+            }
+            else
+            {
+                Console.WriteLine($"el found: {name}");
+            }
             el?.Click();
         }
         public void Pause()
@@ -77,7 +90,7 @@ namespace Tolerador.WebSiteExtensions
             get
             {
                 using var video = GetWatchNodeEl<HTMLVideoElement>("video");
-                return video != null && !video.Paused && !video.Ended && video.CurrentTime > 0d && video.ReadyState > 2;
+                return video?.IsPlaying() ?? false;
             }
         }
         public double Volume

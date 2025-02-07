@@ -17,7 +17,7 @@
                 <tr title="SpawnDev.BlazorJS version"><td>@JS.InformationalVersion</td><td>SpawnDev.BlazorJS</td></tr>
                 <tr title="Startup time in seconds"><td>@(Math.Round(TimeSpan.FromMilliseconds(JS.ReadyTime).TotalSeconds, 1))s</td><td>Startup time</td></tr>
                 <tr title="navigator.hardwareConcurrency"><td>@(JS.Get<Navigator>("navigator").HardwareConcurrency)</td><td>HardwareConcurrency</td></tr>
-                <tr title="crossOriginIsolated"><td>@(JS.CrossOriginIsolated ? "✔" : "❌")</td><td>CrossOriginIsolated</td></tr>
+                <tr title="crossOriginIsolated"><td>@(JS.CrossOriginIsolated == null ? "?" : JS.CrossOriginIsolated == true ? "✔" : "❌")</td><td>CrossOriginIsolated</td></tr>
                 <tr title="SIMD supported by browser and device"><td>@(SIMDSupported ? "✔" : "❌")</td><td>Browser Simd</td></tr>
                 <tr title="System.Runtime.Intrinsics.Wasm.PackedSimd.IsSupported"><td>@(System.Runtime.Intrinsics.Wasm.PackedSimd.IsSupported ? "✔" : "❌")</td><td>PackedSimd</td></tr>
                 <tr title="System.Runtime.Intrinsics.Vector64.IsHardwareAccelerated"><td>@(System.Runtime.Intrinsics.Vector64.IsHardwareAccelerated ? "✔" : "❌")</td><td>Vector64</td></tr>

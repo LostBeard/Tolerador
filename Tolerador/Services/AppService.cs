@@ -2,8 +2,7 @@
 using SpawnDev.BlazorJS.BrowserExtension;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
 using SpawnDev.BlazorJS.JSObjects;
-using SpawnDev.BlazorJS.SpeerNet;
-using Tolerador.ServiceWorkers;
+using Tolerador.Background;
 
 namespace Tolerador.Services
 {
@@ -16,20 +15,17 @@ namespace Tolerador.Services
         private Task? _Ready = null;
         BlazorJSRuntime JS;
         BrowserExtensionService BrowserExtensionService;
-        BackgroundWorker BackgroundWorker;
-        SpeerNetService SpeerNetService;
-        public AppService(BlazorJSRuntime js, BrowserExtensionService browserExtensionService, BackgroundWorker backgroundWorker, SpeerNetService speerNetService)
+        BackgroundService BackgroundService;
+        public AppService(BlazorJSRuntime js, BrowserExtensionService browserExtensionService, BackgroundService backgroundService)
         {
             JS = js;
             BrowserExtensionService = browserExtensionService;
-            BackgroundWorker = backgroundWorker;
-            SpeerNetService = speerNetService;
+            BackgroundService = backgroundService;
             JS.Log("AppService()");
         }
         async Task InitAsync()
         {
-            await SpeerNetService.Ready;
-            await BackgroundWorker.Ready;
+            await BackgroundService.Ready;
             JS.Log("AppService.InitAsync()");
             switch (BrowserExtensionService.ExtensionMode)
             {
@@ -37,40 +33,19 @@ namespace Tolerador.Services
                     InitContentMode();
                     break;
                 case ExtensionMode.Background:
-                    InitSpeerNetService();
                     await InitBackgroundMode();
                     break;
-                case ExtensionMode.None:
-                    // probably running in a website
-                    if (JS.IsServiceWorkerGlobalScope)
-                    {
-                        InitSpeerNetService();
-                    }
-                    break;
-                case ExtensionMode.Popup:
-                case ExtensionMode.Options:
-                case ExtensionMode.Installed:
+                case ExtensionMode.ExtensionPage:
                     // WebWorkerService.Instances can be used to communicate with the BackgroundWorker instance
                     // In Chrome, calling runtime.connect() from the Options/Popup/Installed window instance never fired on the background worker.
                     // Worked in Firefox
                     break;
+                case ExtensionMode.None:
+                    // probably running in a website: window, worker, shared worker, or service worker
+                    break;
                 default:
                     break;
             }
-        }
-        /// <summary>
-        /// This will be called when any of below are true:
-        /// - Running in an extension background page (Firefox) or background ServiceWorker (Chrome). (ExtensionMode.Background)
-        /// - Not running in an extension and running in a ServiceWorker
-        /// </summary>
-        void InitSpeerNetService()
-        {
-            // load 1 or more nodes
-#if DEBUG && false
-            SpeerNetService.AddSpeerNetNode("ws://localhost:9000/_sio/");
-#else
-            SpeerNetService.AddSpeerNetNode("wss://pi.spawndev.com:44365/_sio/");
-#endif
         }
         Port? BackgroundPort { get; set; }
         List<Port> ContentPorts = new List<Port>();

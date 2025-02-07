@@ -5,21 +5,36 @@ using SpawnDev.BlazorJS.JSObjects;
 using SpawnDev.BlazorJS.WebWorkers;
 using System.Text.RegularExpressions;
 
-namespace Tolerador.ServiceWorkers
+namespace Tolerador.Background
 {
-    public class BackgroundWorker : ServiceWorkerEventHandler
+    public class BackgroundService : ServiceWorkerEventHandler
     {
         BrowserExtensionService BrowserExtensionService;
         List<Task>? InitWaitFor = new List<Task>();
 
         DeclarativeNetRequest? DeclarativeNetRequest => BrowserExtensionService.Browser?.DeclarativeNetRequest;
-        public BackgroundWorker(BlazorJSRuntime js, BrowserExtensionService browserExtensionService) : base(js)
+        Tabs? Tabs => BrowserExtensionService.Browser?.Tabs;
+        public bool InBackground { get; }
+        public BackgroundService(BlazorJSRuntime js, BrowserExtensionService browserExtensionService) : base(js)
         {
             BrowserExtensionService = browserExtensionService;
-            if (BrowserExtensionService.ExtensionMode == ExtensionMode.Background)
+            InBackground = BrowserExtensionService.ExtensionMode == ExtensionMode.Background;
+            if (InBackground)
             {
                 BrowserExtensionService.Browser!.Runtime!.OnMessage += Runtime_OnMessage;
+#if DEBUG
+                DeclarativeNetRequest!.OnRuleMatchedDebug += OnRuleMatchedDebug;
+#endif
+                Tabs!.OnUpdated += Tabs_OnUpdated;
             }
+        }
+        void Tabs_OnUpdated(ChangeInfo info)
+        {
+            JS.Log("Tabs_OnUpdated .Net", info);
+        }
+        void OnRuleMatchedDebug(MatchedRuleInfo info)
+        {
+            Console.WriteLine($"OnRuleMatchedDebug: {info.Rule.RuleId}");
         }
         public void InitAsyncWaitFor(Task task)
         {
@@ -30,10 +45,12 @@ namespace Tolerador.ServiceWorkers
         {
             Log("ExtensionServiceWorker InitAsync >>");
             // little delay to let other auto-starting services run
-            if (BrowserExtensionService.ExtensionMode == ExtensionMode.Background)
+            if (InBackground)
             {
                 var rules = await DeclarativeNetRequest!.GetDynamicRules();
                 JS.Log("Rules::", rules);
+
+                await AddAppRedirectRule();
             }
             await Task.Delay(50);
             await Task.WhenAll(InitWaitFor!);
@@ -49,6 +66,47 @@ namespace Tolerador.ServiceWorkers
                 _ = PatchCSP(cspViolation, sender);
             }
             return false;
+        }
+        int AppRedirectRuleId = 1234567;
+        async Task DelAppRedirectRule()
+        {
+            await DeclarativeNetRequest!.UpdateSessionRules(new UpdateRuleOptions
+            {
+                RemoveRuleIds = new[] { AppRedirectRuleId }
+            });
+        }
+        async Task AddAppRedirectRule()
+        {
+            await DelAppRedirectRule();
+            var extensionId = BrowserExtensionService.ExtensionId;
+            var extensionRootPath = $"chrome-extension://{extensionId}";
+
+            //var extensionBasePath = $"{extensionRootPath}/app/index.html?page=\x01";
+            //var pageUrlEscaped = Regex.Escape(pageUrl);
+            var cspRule = new Rule
+            {
+                Id = AppRedirectRuleId,
+                Action = new RuleAction
+                {
+                    Type = RuleActionType.Redirect,
+                    Redirect = new Redirect
+                    {
+                        RegexSubstitution = $"{extensionRootPath}/app/index.html?page=\x01", 
+                    },
+                },
+                Condition = new RuleCondition
+                {
+                    //RegexFilter = $@"^{extensionRootPath}(/.*)?$",
+                    RegexFilter = "chrome-extension://faoljfandgephiloengedfcipoojfoji/app/(SystemInfo)",
+                    ResourceTypes = new EnumString<ResourceType>[] { ResourceType.MainFrame },
+                }
+            };
+            JS.Log("Adding AddAppRedirectRule", cspRule);
+            // save rule
+            await DeclarativeNetRequest!.UpdateSessionRules(new UpdateRuleOptions
+            {
+                AddRules = new Rule[] { cspRule },
+            });
         }
         async Task PatchCSP(CSPViolation cspViolation, MessageSender sender)
         {
@@ -84,9 +142,9 @@ namespace Tolerador.ServiceWorkers
                 Action = new RuleAction
                 {
                     Type = RuleActionType.ModifyHeaders,
-                    ResponseHeaders = new ModifyHeaderInfo[] 
+                    ResponseHeaders = new ModifyHeaderInfo[]
                     {
-                        new ModifyHeaderInfo 
+                        new ModifyHeaderInfo
                         {
                             Header = "content-security-policy",
                             Operation = HeaderOperation.Set,

@@ -10,3 +10,4 @@ dotnet publish --nologo --configuration %configuration% --output "%outputPath%"
 
 echo "Build complete."
 
+pause

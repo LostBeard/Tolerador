@@ -1,9 +1,11 @@
-﻿using SpawnDev.BlazorJS.JSObjects;
+﻿using SpawnDev.BlazorJS;
+using SpawnDev.BlazorJS.JSObjects;
 
 namespace Tolerador.WebSiteExtensions
 {
     public class WatchNode
     {
+        BlazorJSRuntime JS => BlazorJSRuntime.JS;
         public delegate Element? QuerySelectorDelegate(Document document);
         public string Name { get; set; }
         QuerySelectorDelegate? SelectorFn { get; set; }
@@ -14,21 +16,21 @@ namespace Tolerador.WebSiteExtensions
         public Action<WatchNode>? OnFound { get; set; }
         public Action<WatchNode>? OnLost { get; set; }
         public Element? Query(Document? document) => Query<Element>(document);
+        public ShadowRootQueryMode ShadowRootQueryMode { get; set; } = ShadowRootQueryMode.Strict;
         public TElement? Query<TElement>(Document? document) where TElement : Element
         {
             if (document == null) return null;
             if (SelectorFn != null)
             {
                 var el = SelectorFn(document);
-                return el == null ? null : el.JSRefMove<TElement>();
+                return el?.JSRefMove<TElement>();
             }
             TElement? ret = null;
-            using var nodeList = document?.QuerySelectorAll<TElement>(Selector);
-            if (nodeList != null && nodeList.Length > 0)
+            var nodeList = document?.DeepQuerySelectorAll<TElement>(Selector, ShadowRootQueryMode);
+            if (nodeList != null && nodeList.Count > 0)
             {
                 if (CheckVisibility)
                 {
-                    //var elements = nodeList.ToArray<TElement>();
                     foreach (TElement element in nodeList)
                     {
                         if (ret == null && element.CheckVisibility(CheckVisibilityOptions))
@@ -43,7 +45,7 @@ namespace Tolerador.WebSiteExtensions
                 }
                 else
                 {
-                    ret = nodeList.Item(0);
+                    ret = nodeList[0];
                 }
             }
             return ret;
@@ -51,8 +53,8 @@ namespace Tolerador.WebSiteExtensions
         List<TElement> QueryAll<TElement>(Document? document) where TElement : Element
         {
             var ret = new List<TElement>();
-            using var nodeList = document?.QuerySelectorAll<TElement>(Selector);
-            if (nodeList != null && nodeList.Length > 0)
+            var nodeList = document?.DeepQuerySelectorAll<TElement>(Selector, ShadowRootQueryMode);
+            if (nodeList != null && nodeList.Count > 0)
             {
                 if (CheckVisibility)
                 {
@@ -75,7 +77,6 @@ namespace Tolerador.WebSiteExtensions
             }
             return ret;
         }
-
         public WatchNode(string name, QuerySelectorDelegate selectorFn, bool checkVisibility = false, Action<WatchNode>? onFound = null, Action<WatchNode>? onLost = null)
         {
             Name = name;

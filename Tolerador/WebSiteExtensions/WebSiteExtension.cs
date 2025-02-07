@@ -1,17 +1,22 @@
 ﻿using SpawnDev.BlazorJS;
 using SpawnDev.BlazorJS.BrowserExtension.Services;
 using SpawnDev.BlazorJS.JSObjects;
+using Window = SpawnDev.BlazorJS.JSObjects.Window;
+using Action = System.Action;
+using Timer = System.Timers.Timer;
 
 namespace Tolerador.WebSiteExtensions
 {
     public class WebSiteExtension : IDisposable
     {
+        public Uri LocationUrl { get; set; }
         public List<WatchNode> WatchNodes { get; set; } = new List<WatchNode>();
         public Document? Document { get; private set; }
         public Window? Window { get; private set; }
         public MutationObserver? BodyObserver { get; private set; }
         public BlazorJSRuntime JS;
         public BrowserExtensionService BrowserExtensionService { get; private set; }
+        Timer currentTimeUpdateTimer = new Timer();
         public WebSiteExtension(BlazorJSRuntime js, BrowserExtensionService browserExtensionService)
         {
             JS = js;
@@ -27,7 +32,23 @@ namespace Tolerador.WebSiteExtensions
             // watch for url changes
             BrowserExtensionService.OnLocationChanged += BrowserExtensionService_OnLocationChanged;
             BrowserExtensionService_OnLocationChanged(BrowserExtensionService.LocationUri);
-            if (LocationSupported) WatchedNodesUpdate();
+            currentTimeUpdateTimer.Interval = 1000;
+            currentTimeUpdateTimer.Elapsed += CurrentTimeUpdateTimer_Elapsed;
+            currentTimeUpdateTimer.Enabled = true;
+        }
+        private void CurrentTimeUpdateTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                if (LocationSupported)
+                {
+                    WatchedNodesUpdate();
+                }
+            }
+            catch (Exception ex)
+            {
+                JS.Log($"CurrentTimeUpdateTimer_Elapsed error: {ex.Message} {ex.StackTrace}");
+            }
         }
 
         /// <summary>
@@ -92,7 +113,7 @@ namespace Tolerador.WebSiteExtensions
             }
             OnWatchedNodesUpdated?.Invoke(changed);
         }
-        public bool LocationSupported { get; protected set; }
+        public bool LocationSupported { get; protected set; } = false;
         protected virtual bool LocationSupportedCheck(Uri locationUri)
         {
             return true;
@@ -110,7 +131,6 @@ namespace Tolerador.WebSiteExtensions
         public event Action<WatchNode> OnWatchNodeLost;
         private void BrowserExtensionService_OnLocationChanged(Uri locationUri)
         {
-            // the location has changed
             var locationSupported = LocationSupportedCheck(locationUri);
             if (LocationSupported != locationSupported)
             {
@@ -129,6 +149,10 @@ namespace Tolerador.WebSiteExtensions
                     BodyObserver?.Disconnect();
                 }
             }
+            if (locationSupported)
+            {
+                WatchedNodesUpdate();
+            }
         }
 
         public delegate void BodyObserverObservedDelegate(Array<MutationRecord> mutations, MutationObserver sender);
@@ -136,6 +160,7 @@ namespace Tolerador.WebSiteExtensions
 
         void BodyObserver_Observed(Array<MutationRecord> mutations, MutationObserver sender)
         {
+            JS.Log("BodyObserver_Observed");
             OnBodyObserverObserved?.Invoke(mutations, sender);
             if (LocationSupported)
             {
@@ -149,12 +174,21 @@ namespace Tolerador.WebSiteExtensions
 
         public void Dispose()
         {
+            if (currentTimeUpdateTimer != null)
+            {
+                currentTimeUpdateTimer.Stop();
+                currentTimeUpdateTimer.Dispose();
+            }
             if (BodyObserver != null)
             {
                 BodyObserver.Disconnect();
                 BodyObserver.Dispose();
                 BodyObserver = null;
             }
+            Window?.Dispose();
+            Window = null;
+            Document?.Dispose();
+            Document = null;
         }
     }
 }
