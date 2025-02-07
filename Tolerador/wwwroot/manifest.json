@@ -1,6 +1,6 @@
 {
   "name": "Tolerador",
-  "description": "Automatically mute ads on Netflix, YouTub, Disney, and Paramount streaming services",
+  "description": "Make ads tolerable with Tolerador ad settings for video streaming sites.",
   "version": "1.0.1",
   "manifest_version": 3,
   "icons": {
